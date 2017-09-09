@@ -1,0 +1,7 @@
+1,The Nightmare Of Elm Street,1993,3.9,4568
+2,The Mummy Returns,1932,3.5,4388
+4,The Thing of Beauty,1991,2.8,6150
+5,Night Ride,1945,2.8,5126
+6,One Magic,1985,3.8,5333
+8,Boys,1994,3.4,5733
+9,Nosferatu: Alternate Version,1959,3.5,5651

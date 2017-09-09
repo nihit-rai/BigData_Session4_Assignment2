@@ -1,0 +1,262 @@
+Loaded the file in Pig using following command in grunt shell
+
+movies = LOAD 'SampleDataSet.csv' USING PigStorage(',')  as (mov_id:int,mov_name:chararray,year:int,rating:double,duration:long);
+
+movie_name_concat = foreach movies Generate CONCAT ((chararray)mov_name, '-',year);
+
+1) Concat
+
+grunt> movie_name_concat = foreach movies Generate CONCAT ((chararray)mov_name, '-',(chararray)year);
+grunt> dump movie_name_concat;
+
+O/p
+
+(The Nightmare Before Christmas-1993)
+(The Mummy-1932)
+(Orphans of the Storm-1921)
+(The Object of Beauty-1991)
+(Night Tide-1963)
+(One Magic Christmas-1985)
+(Muriel's Wedding-1994)
+(Mother's Boys-1994)
+(Nosferatu: Original Version-1929)
+(Nick of Time-1995)
+
+2) Tokenize
+
+grunt> movie_name_tokenized = foreach movies Generate TOKENIZE(mov_name);
+grunt> dump movie_name_tokenized;
+
+o/p
+
+({(The),(Nightmare),(Before),(Christmas)})
+({(The),(Mummy)})
+({(Orphans),(of),(the),(Storm)})
+({(The),(Object),(of),(Beauty)})
+({(Night),(Tide)})
+({(One),(Magic),(Christmas)})
+({(Muriel's),(Wedding)})
+({(Mother's),(Boys)})
+({(Nosferatu:),(Original),(Version)})
+({(Nick),(of),(Time)})
+
+
+3) Sum
+
+grunt> movie_grp = group movies by year;
+grunt> movie_sum_example = foreach movie_grp Generate  (movies.mov_name,movies.duration),SUM(movies.duration);
+grunt> dump movie_sum_example;
+
+o/p
+
+(({(Orphans of the Storm)},{(9062)}),9062)
+(({(Nosferatu: Original Version)},{(5651)}),5651)
+(({(The Mummy)},{(4388)}),4388)
+(({(Night Tide)},{(5126)}),5126)
+(({(One Magic Christmas)},{(5333)}),5333)
+(({(The Object of Beauty)},{(6150)}),6150)
+(({(The Nightmare Before Christmas)},{(4568)}),4568)
+(({(Mother's Boys),(Muriel's Wedding)},{(5733),(6323)}),12056)
+(({(Nick of Time)},{(5333)}),5333)
+
+
+4) Min
+
+grunt> movie = FILTER movies by year == 1994;
+grunt> movie_grp = group movie by year;
+grunt> movie_min_example = foreach movie_grp Generate  (movie.mov_name,movie.duration),MIN(movie.duration);
+grunt> dump movie_min_example;
+
+O/p
+
+(({(Mother's Boys),(Muriel's Wedding)},{(5733),(6323)}),5733)
+
+5) Max
+
+grunt> movie = FILTER movies by year == 1994;
+grunt> movie_grp = group movie by year;
+grunt> movie_max_example = foreach movie_grp Generate  (movie.mov_name,movie.duration),MAX(movie.duration);
+grunt> dump movie_max_example;
+
+O/p
+
+(({(Mother's Boys),(Muriel's Wedding)},{(5733),(6323)}),6323)
+
+6) Limit
+
+grunt> movies_limited = LIMIT movies 3;
+grunt> dump movies_limited;
+
+O/p
+
+(1,The Nightmare Before Christmas,1993,3.9,4568)
+(2,The Mummy,1932,3.5,4388)
+(3,Orphans of the Storm,1921,3.2,9062)
+
+7) Store
+
+grunt> sorted_movies = ORDER movies by year;
+grunt> STORE sorted_movies INTO ' Assignment4_2' USING PigStorage (',');
+
+Input(s):
+Successfully read 10 records from: "file:///home/acadgild/Acadgild/Assignment4_2/SampleDataSet.csv"
+
+Output(s):
+Successfully stored 10 records in: "file:///home/acadgild/Acadgild/Assignment4_2/Assignment4_2"
+
+Counters:
+Total records written : 10
+Total bytes written : 0
+Spillable Memory Manager spill count : 0
+Total bags proactively spilled: 0
+Total records proactively spilled: 0
+
+
+o/p
+
+[acadgild@localhost Assignment4_2]$ pwd
+/home/acadgild/Acadgild/Assignment4_2
+[acadgild@localhost Assignment4_2]$ ls -lrt
+total 36
+-rwxrw-rw-. 1 acadgild acadgild   355 Sep  9 13:51 SampleDataSet.csv
+-rw-rw-r--. 1 acadgild acadgild 11043 Sep  9 18:04 pig_1504946328462.log
+-rw-rw-r--. 1 acadgild acadgild  3499 Sep  9 18:11 pig_1504960710051.log
+-rw-rw-r--. 1 acadgild acadgild  9891 Sep  9 18:45 pig_1504962771456.log
+drwxrwxr-x. 2 acadgild acadgild  4096 Sep  9 19:14 Assignment4_2
+[acadgild@localhost Assignment4_2]$ cd Assignment4_2/
+[acadgild@localhost Assignment4_2]$ ls
+part-r-00000  _SUCCESS
+[acadgild@localhost Assignment4_2]$ cat part-r-00000
+
+3,Orphans of the Storm,1921,3.2,9062
+9,Nosferatu: Original Version,1929,3.5,5651
+2,The Mummy,1932,3.5,4388
+5,Night Tide,1963,2.8,5126
+6,One Magic Christmas,1985,3.8,5333
+4,The Object of Beauty,1991,2.8,6150
+1,The Nightmare Before Christmas,1993,3.9,4568
+8,Mother's Boys,1994,3.4,5733
+7,Muriel's Wedding,1994,3.5,6323
+10,Nick of Time,1995,3.4,5333
+
+
+8) Distinct
+
+Grunt> movies = LOAD 'SampleDataSet_copy.txt' USING PigStorage(',')  as (mov_id:int,mov_name:chararray,year:int,rating:double,duration:long);
+
+Grunt> dump movies;
+
+(1,The Nightmare Before Christmas,1993,3.9,4568)
+(2,The Mummy,1932,3.5,4388)
+(3,Orphans of the Storm,1921,3.2,9062)
+(4,The Object of Beauty,1991,2.8,6150)
+(5,Night Tide,1963,2.8,5126)
+(6,One Magic Christmas,1985,3.8,5333)
+(7,Muriel's Wedding,1994,3.5,6323)
+(8,Mother's Boys,1994,3.4,5733)
+(9,Nosferatu: Original Version,1929,3.5,5651)
+(10,Nick of Time,1995,3.4,5333)
+(1,The Nightmare Before Christmas,1993,3.9,4568)
+(2,The Mummy,1932,3.5,4388)
+(3,Orphans of the Storm,1921,3.2,9062)
+(4,The Object of Beauty,1991,2.8,6150)
+(5,Night Tide,1963,2.8,5126)
+(6,One Magic Christmas,1985,3.8,5333)
+(7,Muriel's Wedding,1994,3.5,6323)
+(8,Mother's Boys,1994,3.4,5733)
+(9,Nosferatu: Original Version,1929,3.5,5651)
+(10,Nick of Time,1995,3.4,5333)
+
+grunt> unique_movies = DISTINCT movies;
+
+grunt> dump unique_movies;
+
+(1,The Nightmare Before Christmas,1993,3.9,4568)
+(2,The Mummy,1932,3.5,4388)
+(3,Orphans of the Storm,1921,3.2,9062)
+(4,The Object of Beauty,1991,2.8,6150)
+(5,Night Tide,1963,2.8,5126)
+(6,One Magic Christmas,1985,3.8,5333)
+(7,Muriel's Wedding,1994,3.5,6323)
+(8,Mother's Boys,1994,3.4,5733)
+(9,Nosferatu: Original Version,1929,3.5,5651)
+(10,Nick of Time,1995,3.4,5333)
+
+
+9) Flatten
+
+grunt> filtered_movies = FILTER movies by year == 1994;
+grunt> movie_group = group filtered_movies by year;
+grunt> dump movie_group;
+
+
+grunt> flatten_example = foreach movie_group generate group, flatten(filtered_movies);
+grunt> dump flatten_example
+
+(1994,8,Mother's Boys,1994,3.4,5733)
+(1994,7,Muriel's Wedding,1994,3.5,6323)
+
+
+10) IsEmpty
+
+
+grunt> movies1 = LOAD 'SampleDataSet.csv' USING PigStorage(',')  as (mov_id:int,mov_name:chararray,year:int,rating:double,duration:long);
+grunt> dump movies1;
+
+(1,The Nightmare Before Christmas,1993,3.9,4568)
+(2,The Mummy,1932,3.5,4388)
+(3,Orphans of the Storm,1921,3.2,9062)
+(4,The Object of Beauty,1991,2.8,6150)
+(5,Night Tide,1963,2.8,5126)
+(6,One Magic Christmas,1985,3.8,5333)
+(7,Muriel's Wedding,1994,3.5,6323)
+(8,Mother's Boys,1994,3.4,5733)
+(9,Nosferatu: Original Version,1929,3.5,5651)
+(10,Nick of Time,1995,3.4,5333)
+
+
+grunt> movies2 = LOAD 'SampleDataSet_WithEmpty.txt' USING PigStorage(',')  as (mov_id:int,mov_name:chararray,year:int,rating:double,duration:long);
+grunt> dump movies2;
+
+(1,The Nightmare Of Elm Street,1993,3.9,4568)
+(2,The Mummy Returns,1932,3.5,4388)
+(4,The Thing of Beauty,1991,2.8,6150)
+(5,Night Ride,1945,2.8,5126)
+(6,One Magic,1985,3.8,5333)
+(8,Boys,1994,3.4,5733)
+(9,Nosferatu: Alternate Version,1959,3.5,5651)
+
+
+grunt> movie_joined = cogroup movies1 by mov_id , movies2 by mov_id; 
+grunt> dump movie_joined;
+
+(1,{(1,The Nightmare Before Christmas,1993,3.9,4568)},{(1,The Nightmare Of Elm Street,1993,3.9,4568)})
+(2,{(2,The Mummy,1932,3.5,4388)},{(2,The Mummy Returns,1932,3.5,4388)})
+(3,{(3,Orphans of the Storm,1921,3.2,9062)},{})
+(4,{(4,The Object of Beauty,1991,2.8,6150)},{(4,The Thing of Beauty,1991,2.8,6150)})
+(5,{(5,Night Tide,1963,2.8,5126)},{(5,Night Ride,1945,2.8,5126)})
+(6,{(6,One Magic Christmas,1985,3.8,5333)},{(6,One Magic,1985,3.8,5333)})
+(7,{(7,Muriel's Wedding,1994,3.5,6323)},{})
+(8,{(8,Mother's Boys,1994,3.4,5733)},{(8,Boys,1994,3.4,5733)})
+(9,{(9,Nosferatu: Original Version,1929,3.5,5651)},{(9,Nosferatu: Alternate Version,1959,3.5,5651)})
+(10,{(10,Nick of Time,1995,3.4,5333)},{})
+
+
+grunt> movies_filtered1 = filter movie_joined by IsEmpty(movies2);
+grunt> dump movie_filtered1;
+
+(3,{(3,Orphans of the Storm,1921,3.2,9062)},{})
+(7,{(7,Muriel's Wedding,1994,3.5,6323)},{})
+(10,{(10,Nick of Time,1995,3.4,5333)},{})
+
+
+grunt> movies_filtered2 = filter movie_joined by not IsEmpty(movies2);
+grunt> dump movie_filtered2;
+
+(1,{(1,The Nightmare Before Christmas,1993,3.9,4568)},{(1,The Nightmare Of Elm Street,1993,3.9,4568)})
+(2,{(2,The Mummy,1932,3.5,4388)},{(2,The Mummy Returns,1932,3.5,4388)})
+(4,{(4,The Object of Beauty,1991,2.8,6150)},{(4,The Thing of Beauty,1991,2.8,6150)})
+(5,{(5,Night Tide,1963,2.8,5126)},{(5,Night Ride,1945,2.8,5126)})
+(6,{(6,One Magic Christmas,1985,3.8,5333)},{(6,One Magic,1985,3.8,5333)})
+(8,{(8,Mother's Boys,1994,3.4,5733)},{(8,Boys,1994,3.4,5733)})
+(9,{(9,Nosferatu: Original Version,1929,3.5,5651)},{(9,Nosferatu: Alternate Version,1959,3.5,5651)})
